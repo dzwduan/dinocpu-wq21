@@ -24,7 +24,9 @@ class SingleCycleCPU(implicit val conf: CPUConfig) extends BaseCPU {
   val (cycleCount, _) = Counter(true.B, 1 << 30)
 
   control.io    := DontCare
+  //registers.io  := DontCare
   aluControl.io := DontCare
+  //alu.io        := DontCare
   immGen.io     := DontCare
   nextpc.io     := DontCare
   io.dmem       := DontCare
@@ -35,30 +37,30 @@ class SingleCycleCPU(implicit val conf: CPUConfig) extends BaseCPU {
 
   val instruction = io.imem.instruction
 
-  //DECODE
-  registers.io.readreg1 := instruction(19,15)
-  registers.io.readreg2 := instruction(24,20)
+  //TODO
+  nextpc.io.inputx := pc
+  nextpc.io.inputy := 4.U
 
-  registers.io.writereg := instruction(11,7)
-  registers.io.wen      := (registers.io.writereg =/= 0.U)
+  val reg = registers.io 
 
-  // EXECUTE
-  nextpc.io.pc := pc
+  control.io.opcode := instruction(6,0)
+  aluControl.io.itype := control.io.itype 
+  aluControl.io.aluop := control.io.aluop
+  control.io.regwrite := true.B 
 
-  aluControl.io.funct7 := instruction(31,25)
+  reg.readreg1:= instruction(19,15)
+  reg.readreg2:= instruction(24,20)
+  reg.writereg:= instruction(11,7)
+  reg.wen     := (reg.writereg=/=0.U)
+
   aluControl.io.funct3 := instruction(14,12)
+  aluControl.io.funct7 := instruction(31,25)
 
   alu.io.operation := aluControl.io.operation
+  alu.io.inputx    := reg.readdata1
+  alu.io.inputy    := reg.readdata2
 
-  alu.io.inputx := registers.io.readdata1
-
-  alu.io.inputy := registers.io.readdata2
-
-  val result = Wire(UInt())
-  result := alu.io.result
-
-  //WRITEBACK
-  registers.io.writedata := result
+  reg.writedata := alu.io.result
 
   pc := nextpc.io.nextpc
 }
