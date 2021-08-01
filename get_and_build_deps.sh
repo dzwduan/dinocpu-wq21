@@ -10,7 +10,7 @@ git clone https://github.com/freechipsproject/firrtl.git
 git clone https://github.com/freechipsproject/firrtl-interpreter.git
 git clone https://github.com/freechipsproject/chisel3.git
 git clone https://github.com/freechipsproject/chisel-testers.git
-git clone https://github.com/freechipsproject/treadle.git
+git clone git://github.com/freechipsproject/treadle.git
 
 # Now, compile each and install to /opt/ivy2/local
 cd firrtl && \
