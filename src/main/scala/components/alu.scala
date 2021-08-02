@@ -21,7 +21,8 @@ class ALU extends Module {
 
     val result    = Output(UInt(32.W))
   })
-
+  
+  
   when (io.operation === "b0110".U) { // and
     io.result := io.inputx & io.inputy
   }

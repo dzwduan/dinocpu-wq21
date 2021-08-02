@@ -24,9 +24,9 @@ class SingleCycleCPU(implicit val conf: CPUConfig) extends BaseCPU {
   val (cycleCount, _) = Counter(true.B, 1 << 30)
 
   control.io    := DontCare
-  //registers.io  := DontCare
+  registers.io  := DontCare
   aluControl.io := DontCare
-  //alu.io        := DontCare
+  alu.io        := DontCare
   immGen.io     := DontCare
   nextpc.io     := DontCare
   io.dmem       := DontCare
@@ -37,30 +37,56 @@ class SingleCycleCPU(implicit val conf: CPUConfig) extends BaseCPU {
 
   val instruction = io.imem.instruction
 
-  //TODO
-  nextpc.io.inputx := pc
-  nextpc.io.inputy := 4.U
 
   val reg = registers.io 
 
   control.io.opcode := instruction(6,0)
-  aluControl.io.itype := control.io.itype 
-  aluControl.io.aluop := control.io.aluop
-  control.io.regwrite := true.B 
 
+
+ 
   reg.readreg1:= instruction(19,15)
   reg.readreg2:= instruction(24,20)
   reg.writereg:= instruction(11,7)
-  reg.wen     := (reg.writereg=/=0.U)
-
+  reg.wen     := (reg.writereg=/=0.U && control.io.regwrite)
+  
+  aluControl.io.itype := control.io.itype 
+  aluControl.io.aluop := control.io.aluop
   aluControl.io.funct3 := instruction(14,12)
   aluControl.io.funct7 := instruction(31,25)
 
-  alu.io.operation := aluControl.io.operation
-  alu.io.inputx    := reg.readdata1
-  alu.io.inputy    := reg.readdata2
+  immGen.io.instruction := instruction
+ 
+  //contect input of nextpc
+  nextpc.io.branch := control.io.branch
+  nextpc.io.jal    := control.io.jal
+  nextpc.io.jalr   := control.io.jalr
+  nextpc.io.inputx := reg.readdata1
+  nextpc.io.inputy := reg.readdata2
+  nextpc.io.funct3 := instruction(14,12)
+  nextpc.io.pc     := pc
+  nextpc.io.imm    := immGen.io.sextImm
 
-  reg.writedata := alu.io.result
+  alu.io.operation := aluControl.io.operation
+  alu.io.inputx    := Mux(control.io.xsrc,pc,reg.readdata1)
+
+  when(control.io.plus4 === false.B) {
+    alu.io.inputy := Mux(control.io.ysrc,immGen.io.sextImm,reg.readdata2)
+  }.otherwise {
+    alu.io.inputy := 4.U
+  }
+
+  val result = Wire(UInt())
+  when(control.io.resultselect) {
+    result := immGen.io.sextImm
+  }.otherwise{
+    result := alu.io.result
+  }
+
+
+  when(control.io.toreg ===false.B){
+    reg.writedata := result 
+  }//TODO
+  
 
   pc := nextpc.io.nextpc
 }
