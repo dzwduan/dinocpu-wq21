@@ -3,6 +3,17 @@
 package dinocpu.components
 
 import chisel3._
+import chisel3.util._
+import dinocpu.components.Branch_Op._
+
+case object Branch_Op{
+  val BEQ  = 0.U
+  val BNE  = 1.U
+  val BLT  = 4.U 
+  val BGE  = 5.U
+  val BLTU = 6.U
+  val BGEU = 7.U
+}
 
 /**
  * Next PC unit. This takes various inputs and outputs the next address of the next instruction.
@@ -35,28 +46,31 @@ class NextPC extends Module {
     val taken   = Output(Bool())
   })
 
-  when (io.branch) {
-    when (io.funct3 === "b000".U)      { io.taken := io.inputx === io.inputy } // beq
-    .elsewhen (io.funct3 === "b001".U) { io.taken := io.inputx =/= io.inputy } // bne
-    .elsewhen (io.funct3 === "b100".U) { io.taken := (io.inputx.asSInt < io.inputy.asSInt).asUInt } // blt
-    .elsewhen (io.funct3 === "b101".U) { io.taken := (io.inputx.asSInt >= io.inputy.asSInt).asUInt } // bge
-    .elsewhen (io.funct3 === "b110".U) { io.taken := io.inputx < io.inputy } // bltu
-    .elsewhen (io.funct3 === "b111".U) { io.taken := io.inputx >= io.inputy } // bgeu
-    .otherwise                         { io.taken := false.B } // invalid
+  //io.nextpc := io.pc + 4.U
+  //io.taken  := false.B
 
-    when (io.taken) {
-      io.nextpc := io.pc + io.imm
-    } .otherwise {
-      io.nextpc := io.pc + 4.U
-    }
-  } .elsewhen (io.jal) {
-    io.taken := true.B // All jumps are taken
+  // Your code goes here part 0
+  // case branch
+  when(io.branch) {
+    io.taken := MuxLookup(io.funct3,false.B,Array(
+      BEQ  ->  (io.inputx === io.inputy),
+      BNE  ->  (io.inputx =/= io.inputy),
+      BLT  ->  (io.inputx.asSInt  <   io.inputy.asSInt).asUInt,
+      BGE  ->  (io.inputx.asSInt  >=  io.inputy.asSInt).asUInt,
+      BLTU ->  (io.inputx.asUInt  <  io.inputy.asUInt),
+      BGEU ->  (io.inputx.asUInt  >  io.inputy.asUInt)
+    ))
+
+    io.nextpc := Mux(io.taken, io.pc+io.imm,io.pc+4.U)
+  }.elsewhen(io.jal){
+    io.taken  := true.B 
     io.nextpc := io.pc + io.imm
-  } .elsewhen (io.jalr) {
-    io.taken := true.B // All jumps are taken
+  }.elsewhen(io.jalr){
+    io.taken  := true.B 
     io.nextpc := io.inputx + io.imm
-  } .otherwise {
+  }.otherwise{
+    io.taken  := false.B 
     io.nextpc := io.pc + 4.U
-    io.taken  := false.B
   }
+
 }

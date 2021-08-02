@@ -97,7 +97,7 @@ class PipelinedCPU(implicit val conf: CPUConfig) extends BaseCPU {
   alu.io        := DontCare
   immGen.io     := DontCare
   pcPlusFour.io := DontCare
-  nextPCmod.io  := DontCare
+  //branchAdd.io  := DontCare
   io.dmem       := DontCare
   forwarding.io := DontCare
   hazard.io     := DontCare
