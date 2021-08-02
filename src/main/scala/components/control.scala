@@ -65,23 +65,23 @@ class Control extends Module {
 
       Array(              /*     itype,   aluop,   xsrc,    ysrc,    branch,  jal,     jalr     plus4,   resultselect, memop, toreg,   regwrite, validinst */
       // R-format
-      BitPat("b0110011") -> List(false.B, true.B,  false.B, false.B, false.B, false.B, false.B, false.B, false.B,      0.U,   false.B, false.B,   true.B),
+      BitPat("b0110011") -> List(false.B, true.B,  false.B, false.B, false.B, false.B, false.B, false.B, false.B,      0.U,   false.B, true.B,   true.B),
 
       // Your code coes here for Lab 2.
       // Remember to make sure to have commas at the end of each line
-      // I-type without jal and jalr
+      // I-type without jal and jalr y
       BitPat("b0010011") -> List(true.B,  true.B,   false.B,  true.B, false.B, false.B, false.B, false.B, false.B,     0.U,   false.B, true.B,   true.B),
-      //jal   pc += sext(offset)
+      //jal   pc += sext(offset) y
       BitPat("b1101111") -> List(false.B, false.B,  true.B,  false.B, false.B,  true.B, false.B, true.B, false.B,      0.U,   false.B, true.B,  true.B),
-      //jalr  pc =(x[rs1]+sext(offset))
+      //jalr  pc =(x[rs1]+sext(offset)) n
       BitPat("b1100111") -> List(false.B, false.B,  true.B, true.B, false.B,  false.B, true.B,  true.B,  false.B,      0.U,    false.B, true.B,  true.B),
-      //branch
+      //branch y
       BitPat("b1100011") -> List(false.B, false.B,  false.B, false.B, true.B,  false.B, false.B, false.B, false.B,     0.U,   false.B, false.B,  true.B),
-      //load  x[rd] = sext(M[x[rs1] + sext(offset)][31:0])
+      //load  x[rd] = sext(M[x[rs1] + sext(offset)][31:0]) y
       BitPat("b0000011") -> List(false.B, false.B,  false.B, true.B, false.B, false.B,  false.B, false.B, false.B,     2.U,   true.B, true.B,   true.B),
-      //store M[x[rs1] + sext(offset) = x[rs2][31: 0]
+      //store M[x[rs1] + sext(offset) = x[rs2][31: 0] y
       BitPat("b0100011") -> List(false.B, false.B,  false.B, true.B, false.B, false.B,  false.B, false.B, false.B,     3.U,   false.B, false.B,   true.B),
-      //lui   x[rd] = sext(immediate[31:12] << 12)
+      //lui   x[rd] = sext(immediate[31:12] << 12) y 
       BitPat("b0110111") -> List(false.B, false.B,  false.B, false.B, false.B, true.B, false.B, false.B, true.B,       0.U,   false.B, true.B,   true.B),
       //auipc x[rd] = pc + sext(immediate[31:12] << 12)
       BitPat("b0010111") -> List(false.B, false.B,  true.B,  true.B, false.B, true.B,  false.B, false.B, false.B,      0.U,   false.B, true.B,   true.B),

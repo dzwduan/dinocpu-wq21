@@ -49,8 +49,8 @@ class SingleCycleCPU(implicit val conf: CPUConfig) extends BaseCPU {
   reg.writereg:= instruction(11,7)
   reg.wen     := (control.io.regwrite)&&(reg.writereg=/=0.U)
   
-  aluControl.io.itype := control.io.itype 
-  aluControl.io.aluop := control.io.aluop
+  aluControl.io.itype  := control.io.itype 
+  aluControl.io.aluop  := control.io.aluop
   aluControl.io.funct3 := instruction(14,12)
   aluControl.io.funct7 := instruction(31,25)
 
@@ -82,12 +82,19 @@ class SingleCycleCPU(implicit val conf: CPUConfig) extends BaseCPU {
     result := alu.io.result
   }
 
+  // memop         00 if not using memory, 10 if reading, and 11 if writing
+  io.dmem.address   := alu.io.result
+  io.dmem.memread   := (control.io.memop === 2.U)
+  io.dmem.memwrite  := (control.io.memop === 3.U)
+  //TODO
+  io.dmem.valid     := control.io.memop(1)
+  io.dmem.maskmode  := instruction(13,12)
+  io.dmem.sext      := ~instruction(14)
+  io.dmem.writedata := reg.readdata2
 
-  when(control.io.toreg ===false.B){
-    reg.writedata := result 
-  }//TODO
+
+  reg.writedata := Mux(control.io.toreg, io.dmem.readdata, result)
   
-
   pc := nextpc.io.nextpc
 }
 
