@@ -30,9 +30,7 @@ case object ALU_OP {
   val ADD  = 7.U
   val SLL  = 8.U 
   val SLT  = 9.U
-  val XXX  = "b1111".U
-
-  
+  //val XXX  = "b1111".U
 }
 
 class ALUControl extends Module {
@@ -44,12 +42,12 @@ class ALUControl extends Module {
     val operation = Output(UInt(4.W))
   })
 
-  io.operation := XXX
+  io.operation := ADD
   //Muxcase / ListLookup
   //R-type
   when(io.aluop) {
       when(io.funct7 === 0.U){
-        io.operation := MuxLookup(io.funct3,XOR,Array(
+        io.operation := MuxLookup(io.funct3,ADD,Array(
         0.U -> ADD,
         1.U -> SLL,
         2.U -> SLT,
@@ -60,7 +58,7 @@ class ALUControl extends Module {
         7.U -> AND
         ))
       }.elsewhen(io.funct7 === "b0100000".U){
-        io.operation := MuxLookup(io.funct3,XOR,Array(
+        io.operation := MuxLookup(io.funct3,ADD,Array(
         0.U -> SUB,
         5.U -> SRA
         ))
@@ -69,7 +67,9 @@ class ALUControl extends Module {
     io.operation := ADD
   }
 
-
-
+  // //没有subi
+  // when(io.aluop && io.itype===false.B && io.funct7 === "b0100000".U && io.funct3===0.U) {
+  //   io.operation := SUB
+  // }
 
 }

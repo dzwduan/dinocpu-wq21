@@ -47,7 +47,7 @@ class SingleCycleCPU(implicit val conf: CPUConfig) extends BaseCPU {
   reg.readreg1:= instruction(19,15)
   reg.readreg2:= instruction(24,20)
   reg.writereg:= instruction(11,7)
-  reg.wen     := (reg.writereg=/=0.U && control.io.regwrite)
+  reg.wen     := (control.io.regwrite)&&(reg.writereg=/=0.U)
   
   aluControl.io.itype := control.io.itype 
   aluControl.io.aluop := control.io.aluop

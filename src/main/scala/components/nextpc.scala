@@ -52,7 +52,7 @@ class NextPC extends Module {
   // Your code goes here part 0
   // case branch
   when(io.branch) {
-    io.taken := MuxLookup(io.funct3,0.U,Array(
+    io.taken := MuxLookup(io.funct3,false.B,Array(
       BEQ  ->  (io.inputx === io.inputy),
       BNE  ->  (io.inputx =/= io.inputy),
       BLT  ->  (io.inputx.asSInt  <   io.inputy.asSInt).asUInt,
