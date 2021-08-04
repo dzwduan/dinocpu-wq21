@@ -21,12 +21,34 @@ class PipelinedCPU(implicit val conf: CPUConfig) extends BaseCPU {
     val pc          = UInt(32.W)
   }
 
+
+//refer control.scala
+//  * Output: itype         true if we're working on an itype instruction
+//  * Output: aluop         true for R-type and I-type, false otherwise
+//  * Output: xsrc          source for the first ALU/nextpc input (0 is readdata1, 1 is pc)
+//  * Output: ysrc          source for the second ALU/nextpc input (0 is readdata2 and 1 is immediate) 注意零号寄存器
+//  * Output: branch        true if branch
+//  * Output: jal           true if a jal
+//  * Output: jalr          true if a jalr instruction
+//  * Output: plus4         true if ALU should add 4 to inputx
+//  * Output: resultselect  false for result from alu, true for immediate
   // Control signals used in EX stage
   class EXControl extends Bundle {
+    val branch = Bool()
+    val jal    = Bool()
+    val jalr   = Bool()
+    val itype  = Bool()
+    val aluop  = Bool()
+    val xsrc   = Bool()
+    val ysrc   = Bool()
+    val plus4  = Bool()
+    val resultselect = Bool()
   }
 
   // Control signals used in MEM stage
   class MControl extends Bundle {
+    val toreg = Bool()
+    val regwrite = UInt(2.W)
   }
 
   // Control signals used in WB stage
@@ -35,6 +57,11 @@ class PipelinedCPU(implicit val conf: CPUConfig) extends BaseCPU {
 
   // Data of the the register between ID and EX stages
   class IDEXBundle extends Bundle {
+    val pc = UInt(32.W)
+    val sectImm = UInt(32.W)
+    val readdata1 = UInt(32.W)
+    val readdata2 = UInt(32.W)
+    val inst = UInt(32.W)
   }
 
   // Control block of the IDEX register
@@ -46,6 +73,11 @@ class PipelinedCPU(implicit val conf: CPUConfig) extends BaseCPU {
 
   // Everything in the register between EX and MEM stages
   class EXMEMBundle extends Bundle {
+    val nextpc = UInt(32.W)
+    val taken  = Bool()
+    val inst   = UInt(32.W)
+    val result_sel = UInt(32.W)
+    val mb_writedata = UInt(32.W)
   }
 
   // Control block of the EXMEM register
@@ -56,6 +88,9 @@ class PipelinedCPU(implicit val conf: CPUConfig) extends BaseCPU {
 
   // Everything in the register between MEM and WB stages
   class MEMWBBundle extends Bundle {
+    val readdata = UInt(32.W)
+    val inst     = UInt(32.W)
+    val result _sel = UInt(32.W)
   }
 
   // Control block of the MEMWB register
